@@ -1,0 +1,21 @@
+{
+  "name": "bot",
+  "version": "1.0.0",
+  "description": "bot just for fun",
+  "main": "index.js",
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "author": "Tomas Mali",
+  "license": "ISC",
+  "dependencies": {
+    "node-telegram-bot-api": "^0.30.0",
+    "telegram-node-bot": "^4.0.5",
+    "axios": "^0.18.0",
+    "express": "^4.16.4",
+    "http": "0.0.0",
+    "http-headers": "^3.0.2",
+    "node-cron": "^2.0.3",
+    "request": "^2.88.0"
+  }
+}
