@@ -31,6 +31,7 @@ const REMOVE_ME = "Remove me"
 
 inline_keyboard = [];
 cercaTavolaMenu = [];
+allMenus = [];
 
 
 
@@ -75,12 +76,53 @@ bot.on('message', (msg) => {
 
     if (msg.text.toString() === VOGLIO_ORDINARE){
      
+
+        axios.get('http://localhost:3000/menu/')
+        .then(response => {
+            let obj = response.data;
+            if (obj.message !== false) {
+                var result = [];
+                const json_ = obj.message;
+
+                json_.forEach(i => result.push(i));
+                var due =0;
+                // Clean the menuarray
+                inline_keyboard = []
+                // Constract the Menu Array
+                json_.forEach((v,index) => {
+
+                  if(index%5 == 0){
+                    inline_keyboard.push([])
+                    indiceArray = index/5   
+                  }
+                        inline_keyboard[indiceArray].push(
+                            {
+                                text: v.menuId ,
+                                callback_data: v.menuId
+                            }
+                        )
+                        allMenus.push(v.menuId.toString())
+                  
+                })
+
+                bot.sendMessage(msg.chat.id, 'Clickare sul numero del menu per ordinare', {
+                    reply_markup: {
+                        inline_keyboard
+                    }
+                })
+            }
+        })
+        .catch(error => {
+            console.log(error);
+        });
         
 
             }
     
 
     else if (msg.text.toString().indexOf(HO_SBAGLIATO) === 0) {
+
+        
 
     }
 
@@ -231,6 +273,39 @@ bot.on('callback_query', query => {
                 bot.sendMessage(chat.id, body);
             }
         })
+    }
+    else if (allMenus.includes(query.data)) {
+
+     axios.get('http://localhost:3000/users/find_one/' + query.from.id)
+     .then(response => {
+         let obj = response.data;
+        const tableNme = obj.message[0].table
+
+        request.post('http://localhost:3000/users/insertMenuIntoUser', {
+            json: {
+                "telegramId" :query.from.id,
+                "tableName" : tableNme,
+                "menuId" : query.data,
+                "quantity" : 1
+            }
+        }, (error, res, body) => {
+            if (error) {
+                console.error(error)
+                bot.sendMessage(msg.chat.id, "Something went wrong!")
+                return
+            }
+            console.log(`statusCode: ${res.statusCode}` + body.message)
+      
+            bot.sendMessage(chat.id, "Hai inserito il menu: "+ query.data)
+    
+        })
+
+
+     })
+     .catch(error => {
+         console.log(error);
+     });
+
     }
     bot.answerCallbackQuery({
         callback_query_id: query.id

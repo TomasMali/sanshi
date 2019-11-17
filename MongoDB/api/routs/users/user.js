@@ -61,6 +61,10 @@ router.get('/getTable', (req, res, next) => {
     })
 });
 
+
+
+
+
 // First route, get all users
 router.get('/find_one/:telegramId', (req, res, next) => {
     const id = req.params.telegramId;
@@ -139,7 +143,7 @@ router.post('/insert', (req, res, next) => {
  */
 router.post('/insertMenuIntoUser', (req, res, next) => {
     const id = req.body.telegramId;
-    const tableName = req.body.tableName;
+    var tableName = req.body.tableName;
     const menuId = req.body.menuId;
     const quantity = req.body.quantity;
 

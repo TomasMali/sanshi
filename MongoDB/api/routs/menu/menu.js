@@ -16,29 +16,61 @@ const axios = require('axios');
 
 
 // First route, get all Menu
-router.get('/:telegramId', (req, res, next) => {
-    const id = req.params.telegramId;
+router.get('/', (req, res, next) => {
+  //  const id = req.params.telegramId;
+    Menu.find()
+        .exec().
+        then(doc => {
+            if(doc.length){
+                console.log(doc.length)
+                res.status(200).json({
+                    message: doc
+                })
+            }
+            else
+            res.status(200).json({
+                message: false
+            })
+       
+        })
+        .catch(err => {
+            console.log(err)
+            res.status(500).json({ error: err })
+        })
 
-                Menu.find()
-                    .exec().
-                    then(doc => {
-                        console.log(doc)
-                        res.status(200).json({
-                            message: doc
-                        })
-                    })
-                    .catch(err => {
-                        console.log(err)
-                        res.status(500).json({ error: err })
-                    })
-        
 })
+
+
+
+
+/**
+ * Gets only one Menu
+ * to be called with http://localhost:3000/menu/getMenu/25
+ */
+router.get('/getMenu/:menuId', (req, res, next) => {
+    const id = req.params.menuId;
+
+    Menu.find({ menuId: id }, function (err, docs) {
+
+        // if exsists than the user doesn't have the table set yet
+        if (docs.length) {
+            res.status(404)
+                .json({ message: docs });
+        }
+        else
+            res.status(404)
+                .json({ message: docs });
+
+    })
+});
+
+
 /**
  *  POST REQUEST Inserisce un menu solo se non esiste. 
  * // Da chimare http://localhost:3000/menu/insert
  * {
 	"menuId" : 22,
-	"name" : sanshi riso,
+	"name" : "sanshi riso",
 	"portion" : 2,
 	"price" : 6
 }
@@ -54,7 +86,7 @@ router.post('/insert', (req, res, next) => {
                 .json({ message: "Menu esistente, inserisci un altro nome!" });
         } else {
             const Menu_ = new Menu({
-          //      _id: new mongoose.Types.ObjectId(),
+                //      _id: new mongoose.Types.ObjectId(),
                 menuId: req.body.menuId,
                 name: req.body.name,
                 portion: req.body.portion,
