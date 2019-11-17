@@ -9,7 +9,12 @@ const userSchema = mongoose.Schema({
     surname: String,
     admin: Boolean,
     launch: Boolean,
-    table: String
+    table: String,
+    menus: [{                                                                     
+      menuId: Number,
+      quantity: Number,
+      arrived: Number
+    }]
     
 })
 

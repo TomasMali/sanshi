@@ -9,6 +9,7 @@ const morgan = require('morgan')
 
 const users = require('./api/routs/users/user')
 const tavola = require('./api/routs/tavola/tavola')
+const menu = require('./api/routs/menu/menu')
 const prova = require('./api/routs/prova')
 
 
@@ -43,6 +44,7 @@ app.use((req,res,next)=>{
 // just go to the ather file if you pass me ...
 app.use('/users',users);
 app.use('/Tavola',tavola)
+app.use('/menu',menu)
 app.use('/prova',prova)
 
 

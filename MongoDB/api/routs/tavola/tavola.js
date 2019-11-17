@@ -18,14 +18,15 @@ const User = require('../users/userModel')
 
 
 // First route, get all Tavola
-router.get('/', (req, res, next) => {
-    const id = req.params.Id;
-    console.log("Arriva:  "+ id)
+router.get('/:telegramId', (req, res, next) => {
+    const id = req.params.telegramId;
     axios.get('http://localhost:3000/users/find_one/' + id)
         .then(response => {
             let obj = response.data;
-            if (!obj.message)
-                res.send("Non sei ancora registrato, clickare / per registrarsi ");
+            if (obj.message === false )
+            res.status(200).json({
+                message: false
+            })
             else {
                 // ############################ USER CONTROLL ################################################
                 Tavola.find()
@@ -37,13 +38,13 @@ router.get('/', (req, res, next) => {
                         })
                     })
                     .catch(err => {
-                        1
                         console.log(err)
                         res.status(500).json({ error: err })
                     })
                 // ############################## END OF USER CONTROLL ##############################################
             }
         })
+        
 })
 
 /**

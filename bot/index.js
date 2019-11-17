@@ -30,7 +30,7 @@ const REMOVE_ME = "Remove me"
 
 
 inline_keyboard = [];
-cercaTavolaMenu = []
+cercaTavolaMenu = [];
 
 
 
@@ -70,15 +70,15 @@ bot.onText(/\//, (msg) => {
 // Catch every messagge text 
 bot.on('message', (msg) => {
 
-    const Gpio = require('onoff').Gpio; //include onoff to interact with the GPIO
-    const LED = new Gpio(17, 'out'); //use GPIO pin 4, and specify that it is output
+  //  const Gpio = require('onoff').Gpio; //include onoff to interact with the GPIO
+  //  const LED = new Gpio(17, 'out'); //use GPIO pin 4, and specify that it is output
 
-    if (msg.text.toString() === VOGLIO_ORDINARE)
-        bot.sendMessage(msg.chat.id, 'Seleziona un tavolo!', {
-            reply_markup: {
-                inline_keyboard
+    if (msg.text.toString() === VOGLIO_ORDINARE){
+     
+        
+
             }
-        })
+    
 
     else if (msg.text.toString().indexOf(HO_SBAGLIATO) === 0) {
 
@@ -88,29 +88,29 @@ bot.on('message', (msg) => {
         voglioOrdinare(bot)
     else if (msg.text.toString().indexOf(ORDINI_NON_ARRIVATI) === 0) {
 
-        LED.writeSync(0); // Turn LED off
-        LED.unexport(); // Unexport GPIO to free resources
+    //    LED.writeSync(0); // Turn LED off
+    //    LED.unexport(); // Unexport GPIO to free resources
 
     }
 
     else if (msg.text.toString().indexOf(SEGNA_COME_ARRIVATO) === 0) {
 
-        if (LED.readSync() === 0) { //check the pin state, if the state is 0 (or off)
-            LED.writeSync(1); //set pin state to 1 (turn LED on)
+    //    if (LED.readSync() === 0) { //check the pin state, if the state is 0 (or off)
+   //         LED.writeSync(1); //set pin state to 1 (turn LED on)
           
-        } else {
-            LED.writeSync(0); //set pin state to 0 (turn LED off)
-            LED.unexport(); // U
-        }
+     //   } else {
+    //        LED.writeSync(0); //set pin state to 0 (turn LED off)
+    //        LED.unexport(); // U
+   //     }
       
 
     }
 
     else if (msg.text.toString().indexOf(CERCA_TAVOLA) === 0) {
-        axios.get('http://localhost:3000/tavola/' + msg.from)
+        axios.get('http://localhost:3000/tavola/' + msg.from.id)
             .then(response => {
                 let obj = response.data;
-                if (obj.message) {
+                if (obj.message !== false) {
                     var result = [];
                     const json_ = obj.message;
 
@@ -133,6 +133,8 @@ bot.on('message', (msg) => {
                         }
                     })
                 }
+                else
+                bot.sendMessage(msg.chat.id, 'Non sei ancora registrato, clickare / per registrarsi')
             })
             .catch(error => {
                 console.log(error);
