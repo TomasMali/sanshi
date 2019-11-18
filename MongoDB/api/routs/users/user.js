@@ -95,6 +95,37 @@ router.get('/find_one/:telegramId', (req, res, next) => {
 
 
 
+
+// Get all menus of a user
+router.get('/ordiniFatti/:telegramId', (req, res, next) => {
+    const id = req.params.telegramId;
+
+    User.find({ telegramId: id})
+        .exec().
+        then(doc => {
+         //   console.log(doc)
+
+            if (doc.length) {
+                res.status(200).json({
+
+                    message: doc
+                })
+            }
+            else {
+                res.status(200).json({
+                    message: false
+                })
+            }
+        })
+        .catch(err => {
+            res.status(500).json({ error: err })
+        })
+
+})
+
+
+
+
 // POST REQUEST
 router.post('/insert', (req, res, next) => {
     const id = req.body.telegramId;
