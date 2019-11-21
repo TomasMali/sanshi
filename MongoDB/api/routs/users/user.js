@@ -294,7 +294,7 @@ router.post('/hoSbagliato', (req, res, next) => {
             ).exec()
                 .then(result => {
                     if (result.nModified != 0)
-                        res.send("Menu: " + menuId + " Rimosso correttamente. inseriscilo di nuovo con il tasto /\//Voglio ordinare")
+                        res.send("Il menu: " + menuId + " Rimosso correttamente. inseriscilo di nuovo con il tasto Voglio ordinare")
                     else
                         res.send("Menu non trovato!")
                 })
