@@ -13,7 +13,10 @@ const userSchema = mongoose.Schema({
     menus: [{                                                                     
       menuId: Number,
       quantity: Number,
-      arrived: Number
+      arrived: Number,
+      name: String,
+      portion: Number,
+      price: Number
     }]
     
 })

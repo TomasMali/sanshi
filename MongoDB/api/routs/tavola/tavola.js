@@ -32,13 +32,13 @@ router.get('/:telegramId', (req, res, next) => {
                 Tavola.find()
                     .exec().
                     then(doc => {
-                        console.log(doc)
+                        // console.log(doc)
                         res.status(200).json({
                             message: doc
                         })
                     })
                     .catch(err => {
-                        console.log(err)
+                        // console.log(err)
                         res.status(500).json({ error: err })
                     })
                 // ############################## END OF USER CONTROLL ##############################################
@@ -76,13 +76,13 @@ router.post('/insert', (req, res, next) => {
             });
             Tavola_.save()
                 .then(result => {
-                    console.log("Tavola " + result + " inserted correctly!")
+                    // console.log("Tavola " + result + " inserted correctly!")
                     res.status(200).json({
                         message: " inserted correctly!",
                     });
                 })
                 .catch(err => {
-                    console.log(err)
+                    // console.log(err)
                     res.status(500).json({ error: err })
                 });
 
@@ -113,12 +113,12 @@ router.post("/patch/:id,:newUser,:tableName", (req, res, next) => {
                     { multi: true }
                 ).exec()
                     .then(result => {
-                        console.log("Utente: " + newUser_ + " rimosso dal tavolo: " + tableName_ + " correttamente")
+                        // console.log("Utente: " + newUser_ + " rimosso dal tavolo: " + tableName_ + " correttamente")
                         // Insert the tablename to an existing User
                         User.updateOne({ telegramId: id_ }, { $set: { table: tableName_ } })
                             .exec()
                             .then(result => {
-                                console.log("Updated or Inseerted the tablename to the current user");
+                                // console.log("Updated or Inseerted the tablename to the current user");
                                 Tavola.updateOne({ tableName: tableName_ }, { $addToSet: { partecipanti: id_ } })
                                     .exec()
                                     .then(result => {
@@ -128,17 +128,17 @@ router.post("/patch/:id,:newUser,:tableName", (req, res, next) => {
                                             res.send("Utente: " + newUser_ + "' già esistente per il tavolo " + tableName_)
                                     })
                                     .catch(err => {
-                                        console.log(err);
+                                        // console.log(err);
                                         res.send("Richiesta non andata a buon fine")
                                     });
                             })
                             .catch(err => {
-                                console.log("Error nell'update " + err);
+                                // console.log("Error nell'update " + err);
                                 res.send("Richiesta non andata a buon fine")
                             });
                     })
                     .catch(err => {
-                        console.log(err)
+                        // console.log(err)
                         res.send("Richiesta non andata a buon fine")
                     })
                 // ############################## END OF USER CONTROLL ##############################################
@@ -165,7 +165,7 @@ router.delete('/delete_one', (req, res, next) => {
     Tavola.deleteOne({ tableName: table_ })
         .exec()
         .then(result => {
-            console.log(result)
+            // console.log(result)
             if (result.deletedCount != 0)
                 res.status(500).json({
                     message: "Tavola '" + table_ + "' removed correctly!"
@@ -176,7 +176,7 @@ router.delete('/delete_one', (req, res, next) => {
                 })
         })
         .catch(err => {
-            console.log(err)
+            // console.log(err)
             res.status(500).json({
                 error: err
             })

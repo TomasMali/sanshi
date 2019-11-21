@@ -22,7 +22,7 @@ router.get('/', (req, res, next) => {
         .exec().
         then(doc => {
             if(doc.length){
-                console.log(doc.length)
+             //   console.log(doc.length)
                 res.status(200).json({
                     message: doc
                 })
@@ -50,7 +50,7 @@ router.get('/', (req, res, next) => {
 router.get('/getMenu/:menuId', (req, res, next) => {
     const id = req.params.menuId;
 
-    Menu.find({ menuId: id }, function (err, docs) {
+    Menu.find({ menuId: id }).exec().then(docs => {
 
         // if exsists than the user doesn't have the table set yet
         if (docs.length) {
@@ -94,7 +94,7 @@ router.post('/insert', (req, res, next) => {
             });
             Menu_.save()
                 .then(result => {
-                    console.log("Menu " + result + " inserted correctly!")
+              //      console.log("Menu " + result + " inserted correctly!")
                     res.status(200).json({
                         message: " inserted correctly!",
                     });

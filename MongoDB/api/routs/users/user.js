@@ -7,6 +7,10 @@ const router = express.Router()
 
 const mongoose = require('mongoose')
 
+const axios = require('axios');
+
+const request = require('request');
+
 
 // First route, get all users
 router.get('/', (req, res, next) => {
@@ -14,13 +18,13 @@ router.get('/', (req, res, next) => {
     User.find()
         .exec().
         then(doc => {
-            console.log(doc)
+            // console.log(doc)
             res.status(200).json({
                 message: doc
             })
         })
         .catch(err => {
-            console.log(err)
+            // console.log(err)
             res.status(500).json({ error: err })
         })
 
@@ -31,13 +35,13 @@ router.get('/launch', (req, res, next) => {
     User.find({ launch: true })
         .exec().
         then(doc => {
-            console.log(doc)
+            // console.log(doc)
             res.status(200).json({
                 message: doc
             })
         })
         .catch(err => {
-            console.log(err)
+            // console.log(err)
             res.status(500).json({ error: err })
         })
 })
@@ -72,7 +76,7 @@ router.get('/find_one/:telegramId', (req, res, next) => {
     User.find({ telegramId: id })
         .exec().
         then(doc => {
-            console.log(doc)
+            // console.log(doc)
 
             if (doc.length) {
                 res.status(200).json({
@@ -100,10 +104,10 @@ router.get('/find_one/:telegramId', (req, res, next) => {
 router.get('/ordiniFatti/:telegramId', (req, res, next) => {
     const id = req.params.telegramId;
 
-    User.find({ telegramId: id})
+    User.find({ telegramId: id })
         .exec().
         then(doc => {
-         //   console.log(doc)
+            //   // console.log(doc)
 
             if (doc.length) {
                 res.status(200).json({
@@ -148,13 +152,13 @@ router.post('/insert', (req, res, next) => {
             });
             user_.save()
                 .then(result => {
-                    console.log("User " + result + " inserted correctly!")
+                    // console.log("User " + result + " inserted correctly!")
                     res.status(200).json({
                         message: " inserted correctly!",
                     });
                 })
                 .catch(err => {
-                    console.log(err)
+                    // console.log(err)
                     res.status(500).json({ error: err })
                 });
         }
@@ -178,7 +182,7 @@ router.post('/insertMenuIntoUser', (req, res, next) => {
     const menuId = req.body.menuId;
     const quantity = req.body.quantity;
 
-    console.log(id + " " + tableName + " " + menuId + " " + quantity)
+    // console.log(id + " " + tableName + " " + menuId + " " + quantity)
 
 
     User.find({ telegramId: id, table: "unknown" }, function (err, docs) {
@@ -200,24 +204,39 @@ router.post('/insertMenuIntoUser', (req, res, next) => {
 
                         // inserts the menu if it doesn't exist
                         if (!docs.length) {
-                            User.updateOne(
-                                { telegramId: id, table: tableName },
-                                {
-                                    $addToSet: {
-                                        menus: {
-                                            menuId: menuId,
-                                            quantity: 1,
-                                            arrived: 0
+
+                            request('http://localhost:3000/menu/getMenu/' + menuId, { json: true }, (err, resp, body) => {
+                                if (err) { return console.log(err); }
+                           //     console.log(body.message[0].name);
+                             const   menuAsString =body.message[0];
+
+                                User.updateOne(
+                                    { telegramId: id, table: tableName },
+                                    {
+                                        $addToSet: {
+                                            menus: {
+                                                menuId: menuId,
+
+                                                name: menuAsString.name,
+                                                portion: menuAsString.portion,
+                                                price: menuAsString.price,
+
+                                                quantity: 1,
+                                                arrived: 0
+                                            }
                                         }
                                     }
-                                }
-                            ).exec()
-                                .then(result => {
-                                    if (result.nModified != 0)
-                                        res.send("Menu: " + menuId + " Inserito correttamente nell'ordine. ")
-                                    else
-                                        res.send("Menu non inserito correnttamente")
-                                })
+                                ).exec()
+                                    .then(result => {
+                                        if (result.nModified != 0)
+                                            res.send("Menu: " + menuId + " Inserito correttamente nell'ordine. ")
+                                        else
+                                            res.send("Menu non inserito correnttamente")
+                                    })
+
+
+                            });
+
                         }
                         // Menues already exists, so only update the quantity
                         else {
@@ -258,7 +277,7 @@ router.post('/hoSbagliato', (req, res, next) => {
     const id = req.body.telegramId;
     const tableName = req.body.tableName;
     const menuId = req.body.menuId;
-    console.log(id + " " + tableName + " " + menuId)
+  //  // console.log(id + " " + tableName + " " + menuId)
 
 
     User.find({ telegramId: id, table: "unknown" }, function (err, docs) {
@@ -269,18 +288,18 @@ router.post('/hoSbagliato', (req, res, next) => {
         }
         else {
 
-    User.updateOne(
-        { telegramId: id, table: tableName },
-        { $pull: { menus: { menuId: menuId } } }
-    ).exec()
-        .then(result => {
-            if (result.nModified != 0)
-                res.send("Menu: " + menuId + " Rimosso correttamente. inseriscilo di nuovo con il tasto /\//Voglio ordinare")
-            else
-                res.send("Menu non trovato!")
-        })
-    }
-})
+            User.updateOne(
+                { telegramId: id, table: tableName },
+                { $pull: { menus: { menuId: menuId } } }
+            ).exec()
+                .then(result => {
+                    if (result.nModified != 0)
+                        res.send("Menu: " + menuId + " Rimosso correttamente. inseriscilo di nuovo con il tasto /\//Voglio ordinare")
+                    else
+                        res.send("Menu non trovato!")
+                })
+        }
+    })
 })
 
 
@@ -300,7 +319,7 @@ router.post('/segnalaComeArrivato', (req, res, next) => {
     const id = req.body.telegramId;
     const tableName = req.body.tableName;
     const menuId = req.body.menuId;
-    console.log(id + " " + tableName + " " + menuId)
+    // console.log(id + " " + tableName + " " + menuId)
     User.updateOne(
         { telegramId: id, table: tableName, "menus.menuId": menuId },
         { $inc: { "menus.$.arrived": 1 } }
@@ -329,7 +348,7 @@ router.delete('/delete_one', (req, res, next) => {
             })
         })
         .catch(err => {
-            console.log(err)
+            // console.log(err)
             res.status(500).json({
                 error: err
             })
@@ -344,7 +363,7 @@ router.delete('/delete_all', (req, res, next) => {
             res.status(500).json(result)
         })
         .catch(err => {
-            console.log(err)
+            // console.log(err)
             res.status(500).json({
                 error: err
             })
@@ -358,11 +377,11 @@ router.patch("/patch/:idT", (req, res, next) => {
     User.update({ telegramId: id }, { $set: req.body })
         .exec()
         .then(result => {
-            console.log(result);
+            // console.log(result);
             res.status(200).json(result);
         })
         .catch(err => {
-            console.log(err);
+            // console.log(err);
             res.status(500).json({
                 error: err
             });
@@ -375,10 +394,10 @@ router.patch("/patch/:tableName", (req, res, next) => {
     User.update({ tableName: tableName }, { $set: req.body })
         .exec()
         .then(result => {
-            console.log("Updated or Inseerted the tablename to the user");
+            // console.log("Updated or Inseerted the tablename to the user");
         })
         .catch(err => {
-            console.log(err);
+            // console.log(err);
             res.status(500).json({
                 error: err
             });
