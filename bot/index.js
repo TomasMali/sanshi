@@ -34,8 +34,8 @@ cercaTavolaMenu = [];
 allMenus = [];
 ordiniFatti = [];
 key_ax = [];
-
 hoSbagliato = [];
+segnaComeArrivato = [];
 
 
 
@@ -185,7 +185,7 @@ bot.on('message', (msg) => {
                                 // ########################################################################################################################
 
 
-                                axios.get('http://localhost:3000/users/ordiniFatti/' + msg.from.id)
+                                axios.get('http://localhost:3000/users/ordiniNonArrivati/' + msg.from.id)
                                     .then(response => {
                                         let obj = response.data;
                                         //    console.log("Ciao " + obj)
@@ -215,17 +215,10 @@ bot.on('message', (msg) => {
                             else
                                 bot.sendMessage(msg.chat.id, 'Prima unisciti al tavolo con il menu Cerca tavolo!')
                         })
-
-
-
                 }
                 else
                     bot.sendMessage(msg.chat.id, 'Non sei ancora registrato, clickare / per registrarsi')
-
-
-
             })
-
     }
 
     else if (msg.text.toString().indexOf(ORDINI_NON_ARRIVATI) === 0 ||
@@ -259,7 +252,7 @@ bot.on('message', (msg) => {
                                             msgConditioned = 'Non ti è ancora arrivato niente :(';
 
                                         if (obj.message == false) {
-                                            bot.sendMessage(msg.chat.id, '')
+                                            bot.sendMessage(msg.chat.id, msgConditioned)
                                             return;
                                         }
                                         const menus = obj.message[0].menus;
@@ -269,20 +262,18 @@ bot.on('message', (msg) => {
                                             if (v.arrived < v.quantity && !arrivati)
                                                 inline_keyboard.push(
                                                     [{
-                                                        text: "[ " + v.menuId + " ]   " + v.name,
+                                                        text: "[ " + v.menuId + " ]   " + v.name + "  [ "+ (v.quantity - v.arrived) + " ]",
                                                         callback_data: "inutile"
                                                     }]
                                                 )
 
-                                            if (v.arrived == v.quantity && arrivati)
+                                            if (v.arrived > 0 && arrivati)
                                                 inline_keyboard.push(
                                                     [{
-                                                        text: "[ " + v.menuId + " ]   " + v.name,
+                                                        text: "[ " + v.menuId + " ]   " + v.name + "  [ "+ v.arrived + " ]",
                                                         callback_data: "inutile"
                                                     }]
                                                 )
-
-
                                         })
                                         var msgConditioned = ""
                                         if (!arrivati)
@@ -295,7 +286,6 @@ bot.on('message', (msg) => {
                                                 inline_keyboard
                                             }
                                         })
-
                                     })
 
                                 // ########################################################################################################################
@@ -303,19 +293,14 @@ bot.on('message', (msg) => {
                             else
                                 bot.sendMessage(msg.chat.id, 'Prima unisciti al tavolo con il menu Cerca tavolo!')
                         })
-
-
-
                 }
                 else
                     bot.sendMessage(msg.chat.id, 'Non sei ancora registrato, clickare / per registrarsi')
-
             })
-
     }
 
-    else if (msg.text.toString().indexOf(ORDINI_ARRIVATI) === 0) {
 
+    else if (msg.text.toString().indexOf(SEGNA_COME_ARRIVATO) === 0) {
         axios.get('http://localhost:3000/tavola/' + msg.from.id)
             .then(response => {
                 let obj = response.data;
@@ -330,69 +315,35 @@ bot.on('message', (msg) => {
                             if (tableNme_ !== "unknown") {
                                 // ########################################################################################################################
 
-
-                                axios.get('http://localhost:3000/users/ordiniFatti/' + msg.from.id)
+                                axios.get('http://localhost:3000/users/ordiniNonArrivati/' + msg.from.id)
                                     .then(response => {
                                         let obj = response.data;
-                                        //    console.log("Ciao " + obj)
+
+                                        if (obj.message == false) {
+                                            bot.sendMessage(msg.chat.id, 'Non hai effettuato ancora ordini!')
+                                            return;
+                                        }
                                         const menus = obj.message[0].menus;
-                                        menuAsString = ''
+
                                         inline_keyboard = []
                                         menus.forEach((v, i) => {
-
-                                            inline_keyboard.push(
-                                                [{
-                                                    text: "[ " + v.menuId + " ]   " + v.name,
-                                                    callback_data: "inutile"
-                                                }]
-                                            )
+                                            if (v.arrived < v.quantity)
+                                                inline_keyboard.push(
+                                                    [{
+                                                        text: "[ " + v.menuId + " ]   " + v.name + "  [ "+ (v.quantity - v.arrived) + " ]",
+                                                        callback_data: "segnaComeArrivato" + v.menuId
+                                                    }]
+                                                )
+                                            segnaComeArrivato.push("segnaComeArrivato" + v.menuId.toString())
                                         })
 
-                                        bot.sendMessage(msg.chat.id, 'Questi sono i tuoi ordini ARRIVATI:', {
+                                        bot.sendMessage(msg.chat.id, "Clicka sull'ordine per segnarlo come Arrivato (1 click = 1 porzione)", {
                                             reply_markup: {
                                                 inline_keyboard
                                             }
                                         })
 
                                     })
-
-                                // ########################################################################################################################
-                            }
-                            else
-                                bot.sendMessage(msg.chat.id, 'Prima unisciti al tavolo con il menu Cerca tavolo!')
-                        })
-
-
-
-                }
-                else
-                    bot.sendMessage(msg.chat.id, 'Non sei ancora registrato, clickare / per registrarsi')
-
-            })
-
-
-
-
-    }
-
-    else if (msg.text.toString().indexOf(SEGNA_COME_ARRIVATO) === 0) {
-
-
-
-        axios.get('http://localhost:3000/tavola/' + msg.from.id)
-            .then(response => {
-                let obj = response.data;
-                if (obj.message !== false) {
-                    // Search if the user has entered in a table
-                    axios.get('http://localhost:3000/users/find_one/' + msg.from.id)
-                        .then(response => {
-                            let obj = response.data;
-                            // if(obj.message)
-                            const tableNme_ = obj.message[0].table
-
-                            if (tableNme_ !== "unknown") {
-                                // ########################################################################################################################
-
 
                                 // ########################################################################################################################
                             }
@@ -502,6 +453,15 @@ bot.on('message', (msg) => {
 })
 
 
+
+//*************************************************************************************************************************** */
+//*************************************************************************************************************************** */
+//*************************************************************************************************************************** */
+//*************************************************************************************************************************** */
+//*************************************************************************************************************************** */
+//*************************************************************************************************************************** */
+
+
 //Risponds when clicks the inline keyboard
 bot.on('callback_query', query => {
     const { message: { chat, message_id, text } = {} } = query
@@ -600,10 +560,52 @@ bot.on('callback_query', query => {
 
             })
 
-
     }
 
+    else if (segnaComeArrivato.includes(query.data)) {
 
+        const menuId = query.data.toString().substr(17)
+
+        axios.get('http://localhost:3000/tavola/' + query.from.id)
+            .then(response => {
+                let obj = response.data;
+                if (obj.message !== false) {
+                    // Search if the user has entered in a table
+                    axios.get('http://localhost:3000/users/find_one/' + query.from.id)
+                        .then(response => {
+                            let obj = response.data;
+                            // if(obj.message)
+                            const tableNme_ = obj.message[0].table
+
+                            if (tableNme_ !== "unknown") {
+                                // ########################################################################################################################
+
+                                var telegramUser = query.from
+                                request.post('http://localhost:3000/users/segnalaComeArrivato', {
+                                    json: {
+                                        "telegramId": telegramUser.id,
+                                        "tableName": tableNme_,
+                                        "menuId": menuId
+                                    }
+                                }, (error, res, body) => {
+                                    bot.sendMessage(query.from.id, body)
+
+                                    console.log(body)
+
+                                })
+
+                                // ########################################################################################################################
+                            }
+                            else
+                                bot.sendMessage(query.from.id, 'Prima unisciti al tavolo con il menu Cerca tavolo!')
+                        })
+                }
+                else
+                    bot.sendMessage(query.from.id, 'Non sei ancora registrato, clickare / per registrarsi')
+
+            })
+
+    }
 
 
 

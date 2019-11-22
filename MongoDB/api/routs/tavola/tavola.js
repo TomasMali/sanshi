@@ -149,10 +149,6 @@ router.post("/patch/:id,:newUser,:tableName", (req, res, next) => {
 
 
 
-
-
-
-
 /**
  * DELETE  the single Table 
  * http://localhost:3000/tavola/delete_one
