@@ -100,8 +100,8 @@ router.get('/find_one/:telegramId', (req, res, next) => {
 
 
 
-// Get all menus of a user
-router.get('/ordiniFatti/:telegramId', (req, res, next) => {
+// Get all menus not yet arrived of a user
+router.get('/ordiniNonArrivati/:telegramId', (req, res, next) => {
     const id = req.params.telegramId;
 
     User.find({ telegramId: id })
@@ -284,7 +284,7 @@ router.post('/hoSbagliato', (req, res, next) => {
 
         // if exsists than the user doesn't have the table set yet
         if (docs.length) {
-            res.send("Prima devi scegliere un tavolo con Cerca tavolo!")
+            res.send("Prima unisciti al tavolo con il menu Cerca tavolo!")
         }
         else {
 
