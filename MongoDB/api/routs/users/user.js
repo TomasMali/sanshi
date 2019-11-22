@@ -215,12 +215,11 @@ router.post('/insertMenuIntoUser', (req, res, next) => {
                                     {
                                         $addToSet: {
                                             menus: {
+                                                tableName: tableName,
                                                 menuId: menuId,
-
                                                 name: menuAsString.name,
                                                 portion: menuAsString.portion,
                                                 price: menuAsString.price,
-
                                                 quantity: 1,
                                                 arrived: 0
                                             }

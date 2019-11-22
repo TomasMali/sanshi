@@ -10,7 +10,8 @@ const userSchema = mongoose.Schema({
     admin: Boolean,
     launch: Boolean,
     table: String,
-    menus: [{                                                                     
+    menus: [{ 
+      tableName:String,                                                                    
       menuId: Number,
       quantity: Number,
       arrived: Number,

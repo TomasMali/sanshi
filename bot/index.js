@@ -25,6 +25,7 @@ const CERCA_TAVOLA = "Cerca tavola"
 //const LASCIA_TAVOLA = "Lascia tavola"
 
 const REMOVE_ME = "Remove me"
+const SITUAZIONE_TAVOLO = "Situazione tavolo"
 
 
 
@@ -33,7 +34,7 @@ inline_keyboard = [];
 cercaTavolaMenu = [];
 allMenus = [];
 ordiniFatti = [];
-key_ax = [];
+voglioOrdinare = [];
 hoSbagliato = [];
 segnaComeArrivato = [];
 
@@ -64,7 +65,7 @@ bot.onText(/\//, (msg) => {
                     [VOGLIO_ORDINARE, HO_SBAGLIATO],
                     [ORDINI_NON_ARRIVATI, ORDINI_ARRIVATI],
                     [SEGNA_COME_ARRIVATO, CERCA_TAVOLA],
-                    [REMOVE_ME]
+                    [REMOVE_ME, SITUAZIONE_TAVOLO]
                 ]
             }
         });
@@ -103,7 +104,7 @@ bot.on('message', (msg) => {
                                             var due = 0;
                                             // Clean the menuarray
                                             inline_keyboard = []
-                                            key_ax = []
+                                            voglioOrdinare = []
                                             // Constract the Menu Array
                                             json_.forEach((v, index) => {
 
@@ -124,11 +125,11 @@ bot.on('message', (msg) => {
                                                 else {
 
                                                     if ((index - 60) % 6 == 0) {
-                                                        key_ax.push([])
+                                                        voglioOrdinare.push([])
                                                         indiceArray = (index - 60) / 6
                                                     }
 
-                                                    key_ax[indiceArray].push(
+                                                    voglioOrdinare[indiceArray].push(
                                                         {
                                                             text: v.menuId,
                                                             callback_data: v.menuId
@@ -146,7 +147,7 @@ bot.on('message', (msg) => {
                                                     inline_keyboard,
                                                 }
                                             })
-                                            inline_keyboard = key_ax;
+                                            inline_keyboard = voglioOrdinare;
                                             bot.sendMessage(msg.chat.id, 'Clickare sul numero del menu per ordinare', {
                                                 reply_markup: {
                                                     inline_keyboard
@@ -190,11 +191,12 @@ bot.on('message', (msg) => {
                                         let obj = response.data;
                                         //    console.log("Ciao " + obj)
                                         const menus = obj.message[0].menus;
-                                        menuAsString = ''
-
+                              
                                         inline_keyboard = []
 
                                         menus.forEach(v => {
+                                            console.log(v.tableName + " " + obj.message[0].table)
+                                            if(v.tableName === obj.message[0].table){
                                             inline_keyboard.push(
                                                 [{
                                                     text: v.menuId + "   " + v.name + "  [ " + v.quantity + " ]",
@@ -202,8 +204,9 @@ bot.on('message', (msg) => {
                                                 }]
                                             )
                                             hoSbagliato.push("hoSbagliato" + v.menuId.toString())
+                                            }
                                         })
-                                        bot.sendMessage(msg.chat.id, 'Clickare sul menu che vuoi cancellare', {
+                                        bot.sendMessage(msg.chat.id, "Clickare sul menu che vuoi cancellare. Attenzione verrà cancellato l'intero menu anche se è stato ordinato più volte!!!", {
                                             reply_markup: {
                                                 inline_keyboard
                                             }
@@ -259,6 +262,8 @@ bot.on('message', (msg) => {
                                         menuAsString = ''
                                         inline_keyboard = []
                                         menus.forEach((v, i) => {
+                                            if(v.tableName === obj.message[0].table){
+                                           
                                             if (v.arrived < v.quantity && !arrivati)
                                                 inline_keyboard.push(
                                                     [{
@@ -274,6 +279,7 @@ bot.on('message', (msg) => {
                                                         callback_data: "inutile"
                                                     }]
                                                 )
+                                            }
                                         })
                                         var msgConditioned = ""
                                         if (!arrivati)
@@ -327,6 +333,7 @@ bot.on('message', (msg) => {
 
                                         inline_keyboard = []
                                         menus.forEach((v, i) => {
+                                            if(v.tableName === obj.message[0].table){
                                             if (v.arrived < v.quantity)
                                                 inline_keyboard.push(
                                                     [{
@@ -335,6 +342,7 @@ bot.on('message', (msg) => {
                                                     }]
                                                 )
                                             segnaComeArrivato.push("segnaComeArrivato" + v.menuId.toString())
+                                                }
                                         })
 
                                         bot.sendMessage(msg.chat.id, "Clicka sull'ordine per segnarlo come Arrivato (1 click = 1 porzione)", {
@@ -479,11 +487,8 @@ bot.on('callback_query', query => {
                 bot.sendMessage(chat.id, body);
             }
         })
-        console.log("VIOAcccc")
     }
     else if (allMenus.includes(query.data)) {
-
-        console.log("VIOA")
 
         axios.get('http://localhost:3000/users/find_one/' + query.from.id)
             .then(response => {
