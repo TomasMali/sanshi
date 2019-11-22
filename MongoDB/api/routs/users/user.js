@@ -14,14 +14,20 @@ const request = require('request');
 
 // First route, get all users
 router.get('/', (req, res, next) => {
-    const id = req.body.telegramId;
+   // const id = req.body.telegramId;
     User.find()
         .exec().
         then(doc => {
             // console.log(doc)
+            if (doc.length) 
             res.status(200).json({
                 message: doc
             })
+            else
+            res.status(200).json({
+                message: false
+            })
+
         })
         .catch(err => {
             // console.log(err)

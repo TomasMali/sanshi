@@ -16,16 +16,18 @@ const COMMAND_TEMPLATE1 = 'template1'
 const COMMAND_TEMPLATE2 = 'template2'
 const COMMAND_TEMPLATE3 = 'template3'
 
-const VOGLIO_ORDINARE = "Voglio ordinare"
-const HO_SBAGLIATO = "Ho sbagliato"
-const ORDINI_NON_ARRIVATI = "Ordini non arrivati"
-const ORDINI_ARRIVATI = "Ordini arrivati"
-const SEGNA_COME_ARRIVATO = "Segna come arrivato"
-const CERCA_TAVOLA = "Cerca tavola"
+const VOGLIO_ORDINARE = "\ud83c\udd95 Voglio ordinare"
+const HO_SBAGLIATO = "\u2b05\ufe0f Ho sbagliato"
+const ORDINI_NON_ARRIVATI = "\u267b\ufe0f Ordini non arrivati"
+const ORDINI_ARRIVATI = "\ud83c\udf63 Ordini arrivati"
+const SEGNA_COME_ARRIVATO = "\ud83d\udcdd Segna come arrivato"
+const CERCA_TAVOLA = "\ud83d\udd0e Cerca tavola"
 //const LASCIA_TAVOLA = "Lascia tavola"
 
 const REMOVE_ME = "Remove me"
-const SITUAZIONE_TAVOLO = "Situazione tavolo"
+const SITUAZIONE_TAVOLO = "\ud83d\udcca Situazione"
+const MENU = "\ud83d\udcdc Menu"
+const ORDINIAMO_INSIEME = "\ud83d\udde3 Tutti insieme"
 
 
 
@@ -65,7 +67,7 @@ bot.onText(/\//, (msg) => {
                     [VOGLIO_ORDINARE, HO_SBAGLIATO],
                     [ORDINI_NON_ARRIVATI, ORDINI_ARRIVATI],
                     [SEGNA_COME_ARRIVATO, CERCA_TAVOLA],
-                    [REMOVE_ME, SITUAZIONE_TAVOLO]
+                    [MENU, SITUAZIONE_TAVOLO, ORDINIAMO_INSIEME]
                 ]
             }
         });
@@ -166,6 +168,18 @@ bot.on('message', (msg) => {
 
 
     }
+    else if (msg.text.toString().indexOf(MENU) === 0) {
+        axios.get('http://localhost:3000/tavola/' + msg.from.id)
+            .then(response => {
+                let obj = response.data;
+                if (obj.message !== false) {
+                    bot.sendMessage(msg.chat.id, "https://it.sanshi.it/wp-content/uploads/sanshi-Limena-serale.pdf")
+                }
+                else
+                    bot.sendMessage(msg.chat.id, "Non sei ancora registrato, clickare / per registrarsi")
+            })
+
+    }
 
 
     else if (msg.text.toString().indexOf(HO_SBAGLIATO) === 0) {
@@ -191,26 +205,30 @@ bot.on('message', (msg) => {
                                         let obj = response.data;
                                         //    console.log("Ciao " + obj)
                                         const menus = obj.message[0].menus;
-                              
+
                                         inline_keyboard = []
+                                        hoSbagliato = []
 
                                         menus.forEach(v => {
                                             console.log(v.tableName + " " + obj.message[0].table)
-                                            if(v.tableName === obj.message[0].table){
-                                            inline_keyboard.push(
-                                                [{
-                                                    text: v.menuId + "   " + v.name + "  [ " + v.quantity + " ]",
-                                                    callback_data: "hoSbagliato" + v.menuId
-                                                }]
-                                            )
-                                            hoSbagliato.push("hoSbagliato" + v.menuId.toString())
+                                            if (v.tableName === obj.message[0].table) {
+                                                inline_keyboard.push(
+                                                    [{
+                                                        text: v.menuId + "   " + v.name + "  [ " + v.quantity + " ]",
+                                                        callback_data: "hoSbagliato" + v.menuId
+                                                    }]
+                                                )
+                                                hoSbagliato.push("hoSbagliato" + v.menuId.toString())
                                             }
                                         })
-                                        bot.sendMessage(msg.chat.id, "Clickare sul menu che vuoi cancellare. Attenzione verrà cancellato l'intero menu anche se è stato ordinato più volte!!!", {
-                                            reply_markup: {
-                                                inline_keyboard
-                                            }
-                                        })
+                                        if (!hoSbagliato.length)
+                                            bot.sendMessage(msg.chat.id, "Non esistono ancora menu da cancellare!")
+                                        else
+                                            bot.sendMessage(msg.chat.id, "Clickare sul menu che vuoi cancellare. Attenzione verrà cancellato l'intero menu anche se è stato ordinato più volte!!!", {
+                                                reply_markup: {
+                                                    inline_keyboard
+                                                }
+                                            })
                                     })
 
                                 // ########################################################################################################################
@@ -262,30 +280,36 @@ bot.on('message', (msg) => {
                                         menuAsString = ''
                                         inline_keyboard = []
                                         menus.forEach((v, i) => {
-                                            if(v.tableName === obj.message[0].table){
-                                           
-                                            if (v.arrived < v.quantity && !arrivati)
-                                                inline_keyboard.push(
-                                                    [{
-                                                        text: "[ " + v.menuId + " ]   " + v.name + "  [ "+ (v.quantity - v.arrived) + " ]",
-                                                        callback_data: "inutile"
-                                                    }]
-                                                )
+                                            if (v.tableName === obj.message[0].table) {
 
-                                            if (v.arrived > 0 && arrivati)
-                                                inline_keyboard.push(
-                                                    [{
-                                                        text: "[ " + v.menuId + " ]   " + v.name + "  [ "+ v.arrived + " ]",
-                                                        callback_data: "inutile"
-                                                    }]
-                                                )
+                                                if (v.arrived < v.quantity && !arrivati)
+                                                    inline_keyboard.push(
+                                                        [{
+                                                            text: "[ " + v.menuId + " ]   " + v.name + "  [ " + (v.quantity - v.arrived) + " ]",
+                                                            callback_data: "inutile"
+                                                        }]
+                                                    )
+
+                                                if (v.arrived > 0 && arrivati)
+                                                    inline_keyboard.push(
+                                                        [{
+                                                            text: "[ " + v.menuId + " ]   " + v.name + "  [ " + v.arrived + " ]",
+                                                            callback_data: "inutile"
+                                                        }]
+                                                    )
                                             }
                                         })
                                         var msgConditioned = ""
-                                        if (!arrivati)
-                                            msgConditioned = 'Questi sono i tuoi ordini NON ARRIVATI:';
+
+                                        if (!inline_keyboard.length) {
+                                            msgConditioned = "Non esistono ancora menu da mostrarti"
+                                        }
                                         else
-                                            msgConditioned = 'Questi sono i tuoi ordini ARRIVATI:';
+                                            if (!arrivati)
+                                                msgConditioned = 'Questi sono i tuoi ordini NON ARRIVATI:';
+                                            else
+                                                msgConditioned = 'Questi sono i tuoi ordini ARRIVATI:';
+
 
                                         bot.sendMessage(msg.chat.id, msgConditioned, {
                                             reply_markup: {
@@ -332,20 +356,28 @@ bot.on('message', (msg) => {
                                         const menus = obj.message[0].menus;
 
                                         inline_keyboard = []
+                                        segnaComeArrivato = []
                                         menus.forEach((v, i) => {
-                                            if(v.tableName === obj.message[0].table){
-                                            if (v.arrived < v.quantity)
-                                                inline_keyboard.push(
-                                                    [{
-                                                        text: "[ " + v.menuId + " ]   " + v.name + "  [ "+ (v.quantity - v.arrived) + " ]",
-                                                        callback_data: "segnaComeArrivato" + v.menuId
-                                                    }]
-                                                )
-                                            segnaComeArrivato.push("segnaComeArrivato" + v.menuId.toString())
+                                            if (v.tableName === obj.message[0].table) {
+                                                if (v.arrived < v.quantity) {
+                                                    inline_keyboard.push(
+                                                        [{
+                                                            text: "[ " + v.menuId + " ]   " + v.name + "  [ " + (v.quantity - v.arrived) + " ]",
+                                                            callback_data: "segnaComeArrivato" + v.menuId
+                                                        }]
+                                                    )
+                                                    segnaComeArrivato.push("segnaComeArrivato" + v.menuId.toString())
                                                 }
+                                            }
                                         })
+                                        var messaggio = "Clicka sull'ordine per segnarlo come Arrivato (1 click = 1 porzione)"
 
-                                        bot.sendMessage(msg.chat.id, "Clicka sull'ordine per segnarlo come Arrivato (1 click = 1 porzione)", {
+                                        console.log(segnaComeArrivato)
+                                        if (!segnaComeArrivato.length) {
+                                            messaggio = "Non esistono ancora menu da mostrarti"
+                                        }
+
+                                        bot.sendMessage(msg.chat.id, messaggio, {
                                             reply_markup: {
                                                 inline_keyboard
                                             }
@@ -445,15 +477,135 @@ bot.on('message', (msg) => {
             });
 
     }
+    else if (msg.text.toString() === SITUAZIONE_TAVOLO) {
+
+
+
+        axios.get('http://localhost:3000/tavola/' + msg.from.id)
+            .then(response => {
+                let obj = response.data;
+                if (obj.message !== false) {
+                    // Search if the user has entered in a table
+                    axios.get('http://localhost:3000/users/find_one/' + msg.from.id)
+                        .then(response => {
+                            let obj = response.data;
+                            // if(obj.message)
+                            const tableNme_ = obj.message[0].table
+
+                            if (tableNme_ !== "unknown") {
+                                // ########################################################################################################################
+                                users = []
+
+
+
+
+                                axios.get('http://localhost:3000/users')
+                                    .then(response => {
+                                        let obj = response.data;
+
+
+
+                                        if (!obj.message.length) {
+                                            bot.sendMessage(msg.chat.id, "Nessun utente trovato! ")
+                                            return;
+                                        }
+
+
+                                        // lists od users []
+                                        const users_1 = obj.message;
+
+
+
+                                        inline_keyboard = []
+                                        var arrivedTot = 0
+                                        var notArrivedTot = 0
+
+                                        users_1.forEach((v, i) => {
+                                            // only users with the same table name
+                                            console.log("Debug users dd  " + tableNme_ + "  " + v.table)
+                                            if (tableNme_.toString() == v.table.toString()) {
+
+                                                console.log("Debug users " + v)
+
+                                                menusForUser = v.menus;
+                                                arrived = 0;
+                                                notArrived = 0;
+
+                                                menusForUser.forEach((u, i) => {
+                                                    // Se il menu è dello stesso tavolo
+                                                    if (v.table === u.tableName) {
+                                                        // Ordine non arrivato
+                                                        if (u.arrived < u.quantity) {
+                                                            notArrived++;
+                                                            notArrivedTot++;
+                                                        }
+                                                        else {
+                                                            arrived++
+                                                            arrivedTot++
+                                                        }
+                                                    }
+                                                })
+
+                                                inline_keyboard.push(
+                                                    [{
+                                                        text: v.name + "    Arrivati [ " + arrived + " ]     Da arrivare [ " + notArrived + " ]",
+                                                        callback_data: "Non Importa"
+                                                    }]
+                                                )
+                                            }
+
+                                        })
+
+
+                                        inline_keyboard.push(
+                                            [{
+                                                text: "****************************************** ",
+                                                callback_data: "Non Importa"
+                                            }]
+                                        )
+
+                                        inline_keyboard.push(
+                                            [{
+                                                text: "TOTALE: " + "    Arrivati [ " + arrivedTot + " ]     Da arrivare [ " + notArrivedTot + " ]",
+                                                callback_data: "Non Importa"
+                                            }]
+                                        )
+
+
+
+                                        bot.sendMessage(msg.from.id, "Situazione tavola: " + tableNme_, {
+                                            reply_markup: {
+                                                inline_keyboard
+                                            }
+                                        })
+                                    })
+
+
+
+
+                                // ########################################################################################################################
+                            }
+                            else
+                                bot.sendMessage(msg.from.id, 'Prima unisciti al tavolo con il menu Cerca tavolo!')
+                        })
+                }
+                else
+                    bot.sendMessage(msg.from.id, 'Non sei ancora registrato, clickare / per registrarsi')
+
+            })
+
+
+
+    }
 
     else if (msg.text.toString() !== "/") {
         bot.sendMessage(msg.chat.id, "Commando non riconosciuto. Usa il menu qui sotto per continuare.", {
             "reply_markup": {
                 "keyboard": [
                     [VOGLIO_ORDINARE, HO_SBAGLIATO],
-                    [ORDINI_NON_ARRIVATI, ORDINI_NON_ARRIVATI],
+                    [ORDINI_NON_ARRIVATI, ORDINI_ARRIVATI],
                     [SEGNA_COME_ARRIVATO, CERCA_TAVOLA],
-                    [REMOVE_ME]
+                    [MENU, SITUAZIONE_TAVOLO, ORDINIAMO_INSIEME]
                 ]
             }
         });
