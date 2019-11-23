@@ -56,7 +56,7 @@ bot.onText(/\//, (msg) => {
     }, (error, res, body) => {
         if (error) {
             console.error(error)
-            bot.sendMessage(msg.chat.id, "Something went wrong!")
+            bot.sendMessage(msg.chat.id, "Ops, Something went wrong!")
             return
         }
         console.log(`statusCode: ${res.statusCode}` + body.message)
