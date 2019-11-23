@@ -206,7 +206,7 @@ router.post('/insertMenuIntoUser', (req, res, next) => {
                         .json({ message: "User or Table or Menu doesn't exsists" });
                 } else {
 
-                    User.find({ telegramId: id, table: tableName, "menus.menuId": menuId }, function (err, docs) {
+                    User.find({ telegramId: id, "menus.tableName": tableName, "menus.menuId": menuId }, function (err, docs) {
 
                         // inserts the menu if it doesn't exist
                         if (!docs.length) {

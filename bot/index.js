@@ -107,6 +107,7 @@ bot.on('message', (msg) => {
                                             // Clean the menuarray
                                             inline_keyboard = []
                                             voglioOrdinare = []
+                                            allMenus = []
                                             // Constract the Menu Array
                                             json_.forEach((v, index) => {
 
@@ -495,27 +496,15 @@ bot.on('message', (msg) => {
                             if (tableNme_ !== "unknown") {
                                 // ########################################################################################################################
                                 users = []
-
-
-
-
                                 axios.get('http://localhost:3000/users')
                                     .then(response => {
                                         let obj = response.data;
-
-
-
                                         if (!obj.message.length) {
                                             bot.sendMessage(msg.chat.id, "Nessun utente trovato! ")
                                             return;
                                         }
-
-
                                         // lists od users []
                                         const users_1 = obj.message;
-
-
-
                                         inline_keyboard = []
                                         var arrivedTot = 0
                                         var notArrivedTot = 0
@@ -524,13 +513,10 @@ bot.on('message', (msg) => {
                                             // only users with the same table name
                                             console.log("Debug users dd  " + tableNme_ + "  " + v.table)
                                             if (tableNme_.toString() == v.table.toString()) {
-
                                                 console.log("Debug users " + v)
-
                                                 menusForUser = v.menus;
                                                 arrived = 0;
                                                 notArrived = 0;
-
                                                 menusForUser.forEach((u, i) => {
                                                     // Se il menu è dello stesso tavolo
                                                     if (v.table === u.tableName) {
@@ -570,19 +556,12 @@ bot.on('message', (msg) => {
                                                 callback_data: "Non Importa"
                                             }]
                                         )
-
-
-
                                         bot.sendMessage(msg.from.id, "Situazione tavola: " + tableNme_, {
                                             reply_markup: {
                                                 inline_keyboard
                                             }
                                         })
                                     })
-
-
-
-
                                 // ########################################################################################################################
                             }
                             else
@@ -591,12 +570,122 @@ bot.on('message', (msg) => {
                 }
                 else
                     bot.sendMessage(msg.from.id, 'Non sei ancora registrato, clickare / per registrarsi')
-
             })
-
-
-
     }
+
+
+
+
+    else if (msg.text.toString() === ORDINIAMO_INSIEME) {
+
+
+
+        axios.get('http://localhost:3000/tavola/' + msg.from.id)
+            .then(response => {
+                let obj = response.data;
+                if (obj.message !== false) {
+                    // Search if the user has entered in a table
+                    axios.get('http://localhost:3000/users/find_one/' + msg.from.id)
+                        .then(response => {
+                            let obj = response.data;
+                            // if(obj.message)
+                            const tableNme_ = obj.message[0].table
+
+                            if (tableNme_ !== "unknown") {
+                                // ########################################################################################################################
+                                users = []
+                                menus_ = []
+                                quantità_ = []
+                                axios.get('http://localhost:3000/users')
+                                    .then(response => {
+                                        let obj = response.data;
+                                        if (!obj.message.length) {
+                                            bot.sendMessage(msg.chat.id, "Nessun utente trovato! ")
+                                            return;
+                                        }
+                                        // lists od users []
+                                        const users_1 = obj.message;
+                                        inline_keyboard = []
+
+
+                                        users_1.forEach((v) => {
+                                            // only users with the same table name
+                                       //     console.log("Debug users dd  " + tableNme_ + "  " + v.table)
+
+                                            if (tableNme_.toString() == v.table.toString()) {   
+                                            menusForUser = []
+                                            menusForUser = v.menus;
+                                  
+                                            menusForUser.forEach((u, i) => {
+                                                // Se il menu è dello stesso tavolo
+                                              
+                                                if (v.table.toString() === u.tableName.toString()) {
+                                                    console.log("Debug users " + v.table.toString() + "    " + u.tableName.toString())
+                                                    // if menu exists, the quantity has to be increased
+                                                    if (menus_.includes(u.menuId)) {
+                                                        indice = menus_.indexOf(u.menuId)
+                                                        quantità_[indice]++
+                                                    }
+                                                    else {
+                                                        menus_.push(u.menuId)
+                                                        quantità_.push(u.quantity - u.arrived)
+                                                    }
+
+                                                }
+                                            })
+                                        }
+                                        })
+
+
+                                        inline_keyboard.push(
+                                            [{
+                                                text: "****************************************** ",
+                                                callback_data: "Non Importa"
+                                            }]
+                                        )
+                                        menus_.forEach((V, i) => {
+                                            if (quantità_[i] > 0)
+                                                inline_keyboard.push(
+                                                    [{
+                                                        text: "CodiceMenu [ " + V + " ]     Da arrivare [ " + quantità_[i] + " ]",
+                                                        callback_data: "Non Importa"
+                                                    }]
+                                                )
+
+                                        })
+                                        inline_keyboard.push(
+                                            [{
+                                                text: "****************************************** ",
+                                                callback_data: "Non Importa"
+                                            }]
+                                        )
+                                        var smgToSend = "Lista degli ordini per il tavolo : " + tableNme_
+                                        if (inline_keyboard.length > 1){
+                                            smgToSend = "Non c'è niente da ordinare per il tavolo : " + tableNme_
+                                        }
+                                           
+
+                                        bot.sendMessage(msg.from.id, smgToSend, {
+                                            reply_markup: {
+                                                inline_keyboard
+                                            }
+                                        })
+                                    })
+                                // ########################################################################################################################
+                            }
+                            else
+                                bot.sendMessage(msg.from.id, 'Prima unisciti al tavolo con il menu Cerca tavolo!')
+                        })
+                }
+                else
+                    bot.sendMessage(msg.from.id, 'Non sei ancora registrato, clickare / per registrarsi')
+            })
+    }
+
+
+
+
+
 
     else if (msg.text.toString() !== "/") {
         bot.sendMessage(msg.chat.id, "Commando non riconosciuto. Usa il menu qui sotto per continuare.", {
@@ -628,6 +717,7 @@ bot.on('callback_query', query => {
     // console.log(query)
     // Try to find if the array of menu matches the callback query
     if (cercaTavolaMenu.includes(query.data)) {
+        const menuId = query.data.toString().substr(15)
         // Here request to add user to the table
         request.post(" http://localhost:3000/tavola/patch/" + query.from.id + "," + query.from.first_name + "," + query.data, (error, res, body) => {
             if (error) {
@@ -641,7 +731,7 @@ bot.on('callback_query', query => {
         })
     }
     else if (allMenus.includes(query.data)) {
-
+        //  const menuId = query.data.toString().substr(15)
         axios.get('http://localhost:3000/users/find_one/' + query.from.id)
             .then(response => {
                 let obj = response.data;
