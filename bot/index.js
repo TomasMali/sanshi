@@ -1,7 +1,8 @@
 
 
 const TelegramBot = require('node-telegram-bot-api');
-const token = '477553552:AAFPFR-UOeW2ObvIIWp8QCQnOyhGTuOWBVo';
+// const token = '477553552:AAFPFR-UOeW2ObvIIWp8QCQnOyhGTuOWBVo';
+const token = '970100402:AAFS5AcjaBBqgEmNEfHSS30_ESlB1cHg8xw';
 const bot = new TelegramBot(token, { polling: true });
 exports.bot = bot;
 
@@ -43,7 +44,7 @@ segnaComeArrivato = [];
 
 
 // Here starts everything
-bot.onText(/\//, (msg) => {
+bot.onText(/\/start/, (msg) => {
     var telegramUser = msg.from
     request.post('http://localhost:3000/users/insert', {
         json: {
@@ -687,7 +688,7 @@ bot.on('message', (msg) => {
 
 
 
-    else if (msg.text.toString() !== "/") {
+    else if (msg.text.toString() !== "/start") {
         bot.sendMessage(msg.chat.id, "Commando non riconosciuto. Usa il menu qui sotto per continuare.", {
             "reply_markup": {
                 "keyboard": [
