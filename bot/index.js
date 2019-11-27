@@ -481,8 +481,6 @@ bot.on('message', (msg) => {
     }
     else if (msg.text.toString() === SITUAZIONE_TAVOLO) {
 
-
-
         axios.get('http://localhost:3000/tavola/' + msg.from.id)
             .then(response => {
                 let obj = response.data;
@@ -523,12 +521,12 @@ bot.on('message', (msg) => {
                                                     if (v.table === u.tableName) {
                                                         // Ordine non arrivato
                                                         if (u.arrived < u.quantity) {
-                                                            notArrived++;
-                                                            notArrivedTot++;
+                                                            notArrived += (u.quantity - u.arrived)
+                                                            notArrivedTot+= (u.quantity - u.arrived)
                                                         }
                                                         else {
-                                                            arrived++
-                                                            arrivedTot++
+                                                            arrived+=u.arrived
+                                                            arrivedTot+=u.arrived
                                                         }
                                                     }
                                                 })

@@ -208,6 +208,7 @@ router.post('/insertMenuIntoUser', (req, res, next) => {
 
                     User.find({ telegramId: id, "menus.tableName": tableName, "menus.menuId": menuId }, function (err, docs) {
 
+                      
                         // inserts the menu if it doesn't exist
                         if (!docs.length) {
 
@@ -245,8 +246,9 @@ router.post('/insertMenuIntoUser', (req, res, next) => {
                         }
                         // Menues already exists, so only update the quantity
                         else {
+                            console.log("TOMAS :" + tableName + " " +menuId + " " + docs.length + " Quantity: " + quantity)
                             User.updateOne(
-                                { telegramId: id, table: tableName, "menus.menuId": menuId },
+                                { telegramId: id, table: tableName, "menus.menuId": menuId , "menus.tableName": tableName },
                                 { $inc: { "menus.$.quantity": quantity } },
                                 {}
                             ).exec()
