@@ -14,19 +14,19 @@ const request = require('request');
 
 // First route, get all users
 router.get('/', (req, res, next) => {
-   // const id = req.body.telegramId;
+    // const id = req.body.telegramId;
     User.find()
         .exec().
         then(doc => {
             // console.log(doc)
-            if (doc.length) 
-            res.status(200).json({
-                message: doc
-            })
+            if (doc.length)
+                res.status(200).json({
+                    message: doc
+                })
             else
-            res.status(200).json({
-                message: false
-            })
+                res.status(200).json({
+                    message: false
+                })
 
         })
         .catch(err => {
@@ -206,16 +206,28 @@ router.post('/insertMenuIntoUser', (req, res, next) => {
                         .json({ message: "User or Table or Menu doesn't exsists" });
                 } else {
 
-                    User.find({ telegramId: id, "menus.tableName": tableName, "menus.menuId": menuId }, function (err, docs) {
+                    // Search for the table 
 
-                      
+                    User.find({ telegramId: id, table: tableName ,
+                           
+                            menus: { $elemMatch: { menuId: menuId, tableName: tableName } }
+                        
+                    }, function (err, docs) {
+                        console.log(" ############################  id " + id + " tableNme:" + tableName + " menuID:" + menuId)
+
+                        console.log("DOCS     :  " + docs)
+
+
                         // inserts the menu if it doesn't exist
                         if (!docs.length) {
 
+                            console.log(" ################e entrato ############  id " + id + " tableNme:" + tableName + " menuID:" + menuId)
+
+
                             request('http://localhost:3000/menu/getMenu/' + menuId, { json: true }, (err, resp, body) => {
                                 if (err) { return console.log(err); }
-                           //     console.log(body.message[0].name);
-                             const   menuAsString =body.message[0];
+                                //     console.log(body.message[0].name);
+                                const menuAsString = body.message[0];
 
                                 User.updateOne(
                                     { telegramId: id, table: tableName },
@@ -246,11 +258,18 @@ router.post('/insertMenuIntoUser', (req, res, next) => {
                         }
                         // Menues already exists, so only update the quantity
                         else {
-                            console.log("TOMAS :" + tableName + " " +menuId + " " + docs.length + " Quantity: " + quantity)
+                            console.log("TOMAS :" + tableName + " " + menuId + " " + docs.length + " Quantity: " + quantity)
+
+
                             User.updateOne(
-                                { telegramId: id, table: tableName, "menus.menuId": menuId , "menus.tableName": tableName },
-                                { $inc: { "menus.$.quantity": quantity } },
-                                {}
+
+                                {
+                                    telegramId: id, table: tableName,
+                                    menus: { $elemMatch: { menuId: menuId, tableName: tableName } }
+                                },
+
+                                { $inc: { 'menus.$.quantity': quantity } }
+
                             ).exec()
                                 .then(result => {
                                     if (result.nModified != 0)
@@ -284,7 +303,7 @@ router.post('/hoSbagliato', (req, res, next) => {
     const id = req.body.telegramId;
     const tableName = req.body.tableName;
     const menuId = req.body.menuId;
-  //  // console.log(id + " " + tableName + " " + menuId)
+    //  // console.log(id + " " + tableName + " " + menuId)
 
 
     User.find({ telegramId: id, table: "unknown" }, function (err, docs) {
