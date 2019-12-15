@@ -512,7 +512,7 @@ bot.on('message', (msg) => {
                                             // only users with the same table name
                                             console.log("Debug users dd  " + tableNme_ + "  " + v.table)
                                             if (tableNme_.toString() == v.table.toString()) {
-                                                console.log("Debug users " + v)
+                                                console.log("Debug users " + v.menus)
                                                 menusForUser = v.menus;
                                                 arrived = 0;
                                                 notArrived = 0;
@@ -523,6 +523,10 @@ bot.on('message', (msg) => {
                                                         if (u.arrived < u.quantity) {
                                                             notArrived += (u.quantity - u.arrived)
                                                             notArrivedTot+= (u.quantity - u.arrived)
+
+                                                            arrived+=u.arrived
+                                                            arrivedTot+=u.arrived
+
                                                         }
                                                         else {
                                                             arrived+=u.arrived
@@ -530,6 +534,7 @@ bot.on('message', (msg) => {
                                                         }
                                                     }
                                                 })
+                                                console.log("£££££££ : " +   arrived + "  Da arrivare: " + notArrived)
 
                                                 inline_keyboard.push(
                                                     [{

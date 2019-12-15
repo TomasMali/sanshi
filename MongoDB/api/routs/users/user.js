@@ -315,8 +315,11 @@ router.post('/hoSbagliato', (req, res, next) => {
         else {
 
             User.updateOne(
-                { telegramId: id, table: tableName },
-                { $pull: { menus: { menuId: menuId } } }
+                { telegramId: id, table: tableName},
+                   
+                { $pull: { "menus" : { menuId: menuId, tableName: tableName } }
+             }
+
             ).exec()
                 .then(result => {
                     if (result.nModified != 0)
@@ -347,7 +350,8 @@ router.post('/segnalaComeArrivato', (req, res, next) => {
     const menuId = req.body.menuId;
     // console.log(id + " " + tableName + " " + menuId)
     User.updateOne(
-        { telegramId: id, table: tableName, "menus.menuId": menuId },
+        { telegramId: id, table: tableName,  
+             menus: { $elemMatch: { menuId: menuId, tableName: tableName } } },
         { $inc: { "menus.$.arrived": 1 } }
     ).exec()
         .then(result => {
