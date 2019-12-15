@@ -623,12 +623,12 @@ bot.on('message', (msg) => {
                                             menusForUser.forEach((u, i) => {
                                                 // Se il menu è dello stesso tavolo
                                               
-                                                if (v.table.toString() === u.tableName.toString()) {
+                                                if (v.table.toString() === u.tableName.toString() && (u.quantity-u.arrived) > 0) {
                                                     console.log("Debug users " + v.table.toString() + "    " + u.tableName.toString())
                                                     // if menu exists, the quantity has to be increased
                                                     if (menus_.includes(u.menuId)) {
                                                         indice = menus_.indexOf(u.menuId)
-                                                        quantità_[indice]++
+                                                        quantità_[indice] = quantità_[indice] + 1
                                                     }
                                                     else {
                                                         menus_.push(u.menuId)
@@ -664,7 +664,9 @@ bot.on('message', (msg) => {
                                             }]
                                         )
                                         var smgToSend = "Lista degli ordini per il tavolo : " + tableNme_
-                                        if (inline_keyboard.length > 1){
+                                        console.log("Conta: " + inline_keyboard.length )
+                                        if (inline_keyboard.length <= 2){
+                                            inline_keyboard.splice(0, 2)
                                             smgToSend = "Non c'è niente da ordinare per il tavolo : " + tableNme_
                                         }
                                            
