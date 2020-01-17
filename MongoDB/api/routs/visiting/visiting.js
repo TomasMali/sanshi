@@ -10,22 +10,30 @@ const router = express.Router()
  * http://localhost:3000/visiting/
  * 
  */
+// First route, get all Menu
 router.get('/', (req, res, next) => {
-    const piva = req.params.piva;
-
-    Visiting.find({}, function (err, docs) {
-
-        // if exsists than the user doesn't have the table set yet
-        if (docs.length) {
-            res.status(400)
-                .json({ message: docs });
-        }
-        else
-            res.status(404)
-                .json({ message: "Nessun risultato trovao" });
-
-    })
-});
+    //  const id = req.params.telegramId;
+    Visiting.find()
+          .exec().
+          then(doc => {
+              if(doc.length){
+               //   console.log(doc.length)
+                  res.status(200).json({
+                      message: doc
+                  })
+              }
+              else
+              res.status(200).json({
+                  message: false
+              })
+         
+          })
+          .catch(err => {
+              console.log(err)
+              res.status(500).json({ error: err })
+          })
+  
+  })
 
 
 // First route, get all users
@@ -34,25 +42,30 @@ router.get('/', (req, res, next) => {
  */
 router.get('/getVisiting/:piva', (req, res, next) => {
     const piva = req.params.piva;
-
-    Visiting.find({PIVA: piva}, function (err, docs) {
-
-        // if exsists than the user doesn't have the table set yet
-        if (docs.length) {
-            res.status(400)
-                .json({ message: docs });
-        }
-        else
-            res.status(404)
-                .json({ message: "Nessun risultato trovao" });
-
-    })
-});
+    Visiting.find({PIVA: piva})
+          .exec().
+          then(doc => {
+            if (doc.length) {
+                res.status(200)
+                    .json({ message: doc});
+            }
+            else
+                res.status(200)
+                    .json({ message: "Nessun risultato trovao" });
+    
+         
+          })
+          .catch(err => {
+              console.log(err)
+              res.status(500).json({ error: err })
+          })
+  
+  })
 
 
 /**
  *  POST REQUEST Inserisce un menu solo se non esiste. 
- * // Da chimare http://localhost:3000/visiting/insert
+ * // Da chimare  
 {
 	"piva": "MLATMS92P09Z100C",
 	"docname" : "tomas.C20"
@@ -80,9 +93,13 @@ router.post('/insert', (req, res, next) => {
                 ).exec()
                     .then(result => {
                         if (result.nModified != 0)
-                            res.send( "Documento: " + DOCNAME_ + " con PIVA: " + PIVA_ + "  Inserito correttamente")
+                        res.status(200)
+                        .json({ message: "Documento: " + DOCNAME_ + " con PIVA: " + PIVA_ + "  Inserito correttamente"});
+                     
                         else
-                            res.send("Documento non inserito correnttamente")
+                        res.status(200)
+                        .json({ message: "Documento non inserito correnttamente"});
+                      
                     })
 
 
