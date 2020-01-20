@@ -132,4 +132,58 @@ router.post('/insert', (req, res, next) => {
 
 })
 
+
+
+
+
+
+
+
+/**
+ *  POST REQUEST Login password 
+ * // Da chimare  
+{
+	"pass": ".....",
+}
+ */
+router.post('/login', (req, res, next) => {
+    const pass = req.body.pass;
+  
+  if(pass == "jexp2020_admin")
+  res.send(true)
+    else
+    res.send(false)
+
+})
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
 module.exports = router;
